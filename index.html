@@ -103,7 +103,7 @@
             if (len/2 <= bombs) alert('You win!');
         }
         if (dom.innerHTML == '&nbsp;') // если клик по пустой ячейке
-            for (var ks = 0; ks < parseInt(Math.sqrt(fileds)); ks++) open(i - ((Math.floor(ks / 3) - 1)), j - (((ks % 3) - 1))); // делаем перебор соседних ячеек и котрываем их, пока не встретим ячейку с вероятностью
+            for (var ks = 0; ks < parseInt(Math.sqrt(fileds)); ks++) open(i - ((Math.floor(ks / 3) - 1)), j - (((ks % 3) - 1))); // делаем перебор соседних ячеек и отрываем их, пока не встретим ячейку с вероятностью
     }
   });
   minesweeper(10, 100); // запуск игры с 10-ю минами и 100 ячейками;
