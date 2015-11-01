@@ -1,0 +1,112 @@
+<html>
+
+<head>
+  <title>minesweeper Game</title>
+  <style>           
+    body div{
+        cursor:pointer;
+        text-align:center;
+        display:inline-block;
+        width:20px;
+        height:20px;
+        border:1px solid lightgray;
+        background-color: lightgray;
+    }
+    .bomb{
+        background-color:red;
+        color:red;
+        border-radius: 4px;
+    }
+    .close{
+        background-color: white;
+        color:white;
+        border:1px solid gray;
+        border-radius: 4px;
+    }
+    .flag{
+        background-color: green;
+        color:green;
+    }
+    #title{
+        width:100%;
+        text-align:center;
+        border:1px solid black;
+        border-radius: 4px;
+        margin: 0;
+    }
+  </style>
+</head>
+<body>
+<p id="title"></p>
+<script>
+  var minesweeper = (function(count, fileds) { // count - максимальное количество мин, fileds - количество ячеек поля
+    // устанавливаем ширину поля:
+    var body = document.getElementsByTagName('body');
+    body[0].style.width = parseInt(Math.sqrt(fileds))*22;
+    // фунция проверки на утановленную мину:
+    function hasBomb(id) {
+        x = document.getElementById(id);
+        return x ? (x.className.indexOf('bomb') != -1 ? 1 : 0) : 0;
+    }
+    // заполнение поля минами и закрытыми участками:
+    var bombs = 0;
+    for (i = 0; i < fileds; i++) {
+        r = document.createElement('div');
+        if (Math.random() * fileds < count && bombs < count) {
+            r.className = 'bomb close', document.getElementById('title').innerHTML = 'Be carefull, field has ' + (++bombs) + ' bomb\'s'; // установка и подсчет мины
+        } else r.className = 'close';
+        // добавляем ячейку c id:
+        r.id = Math.floor(i / 10) + '_' + i % 10;
+        document.body.appendChild(r);
+    }
+    // перебираем все ячейки, проставляем вероятность мины, вешаем обработчики на левый и правый клики мыши: 
+    for (o = 0; o < fileds; o++) {
+        i = Math.floor(o / 10), // строка
+        j = o % 10, // колонка
+        num = 0, // вероятность
+        obj = document.getElementById(i + '_' + j); // текущая ячека
+        // просмативаем соседей каждой ячейки: 
+        for (k = 0; k < parseInt(Math.sqrt(fileds)); k++) 
+        num += hasBomb((i - (Math.floor(k / 3) - 1)) + '_' + (j - (k % 3 - 1))); // подсчет верятности мины по соседсту
+        // установка вероятности:
+        obj.innerHTML = num == 0 ? '&nbsp;' : num;
+        // вешаем обработчик на левый клик по ячейке:
+        obj.onclick = function() {
+            mix = this.id.split('_'), open(mix[0], mix[1]); // в параметры по клику передаем строку и колонку ячейки для дальнейшей обработки
+        }
+        // вешаем обработчик на правый клик по ячейке:
+        obj.oncontextmenu = function() {
+            this.className = this.className.indexOf('flag') != -1 ? this.className.replace(/ flag/, '') : this.className + ' flag'; // помечаем/снимаем пометку с ячейки(класс flag), для обозначения предполагаемой мины
+            return false; // для отмены отображения контекстного меню
+        }
+    }
+    // функция вскрытия закрытой(класс close) ячейки:
+    function open(i, j) {
+        // получаем текущий элемент по его айди i-строка, j-колонка:
+        dom = document.getElementById(i + '_' + j);
+        // если нет такого элемента или он не с пометкой закрыт(close), то останавливаем выполнение:
+        if (!dom || dom.className.indexOf('close') == -1) return;
+        if (dom.className.indexOf('bomb') != -1) { // если мы кликнули по ячейке с миной
+            // игра окончена,вскрываем все остальные ячейки:
+            divs = document.getElementsByTagName('div');
+            for (i = 0; i < divs.length; i++) divs[i].className = divs[i].className.indexOf('bomb') != -1 ? 'bomb' : '';
+            // Выводим Вы проиграли:
+            alert('You lose!');
+        } else { // если ячейка не с миной
+            dom.className = ''; // открываем ее
+            // проходим по всем ячейкам и подсчитываем количество не открытых ячеек(класс close):
+            var elems = document.getElementsByTagName('div'),
+                len = 0;
+            for (ki in elems)
+                if (elems[ki].className && elems[ki].className.indexOf('close') != -1) len++;
+            // если количество оставшихся не открытых ячеек меньше или равно количеству мин, выводим Вы выграли:
+            if (len/2 <= bombs) alert('You win!');
+        }
+        if (dom.innerHTML == '&nbsp;') // если клик по пустой ячейке
+            for (var ks = 0; ks < parseInt(Math.sqrt(fileds)); ks++) open(i - ((Math.floor(ks / 3) - 1)), j - (((ks % 3) - 1))); // делаем перебор соседних ячеек и котрываем их, пока не встретим ячейку с вероятностью
+    }
+  });
+  minesweeper(10, 100); // запуск игры с 10-ю минами и 100 ячейками;
+</script>
+</body>
+</html>
